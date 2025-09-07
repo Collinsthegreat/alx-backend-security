@@ -3,6 +3,7 @@ from datetime import timedelta
 from typing import Optional, Type
 
 from celery import shared_task
+from django.core.mail import send_mail
 from django.apps import apps
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -81,3 +82,7 @@ def flag_suspicious_ips(self, request_limit: int = 100, window_minutes: int = 60
 
     return f"created: high_volume={created_hv}, sensitive={created_sp}"
 
+@shared_task
+def send_test_email(to_email):
+    send_mail("Render Celery Test", "This is a test", "no-reply@example.com", [to_email])
+    return "sent"
