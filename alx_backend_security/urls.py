@@ -19,8 +19,15 @@ from django.contrib import admin
 from django.urls import path
 from ip_tracking import views
 
+#urlpatterns = [
+#    path("admin/", admin.site.urls),
+#    path("anon-login/", views.anonymous_login, name="anon_login"),
+#    path("user-login/", views.user_login, name="user_login"),
+#]
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("anon-login/", views.anonymous_login, name="anon_login"),
-    path("user-login/", views.user_login, name="user_login"),
+    path('admin/', admin.site.urls),
+    path('anon-login/', views.anon_login, name='anon_login'),
+    path('user-login/', views.user_login, name='user_login'),
+    path('', views.home, name='home'),  # 👈 New homepage
 ]
