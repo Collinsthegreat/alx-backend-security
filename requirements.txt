@@ -1,3 +1,5 @@
+setuptools
+wheel
 amqp==5.3.1
 asgiref==3.9.1
 billiard==4.2.1
@@ -10,6 +12,7 @@ click-plugins==1.1.1.2
 click-repl==0.3.0
 colorama==0.4.6
 Django==5.2.6
+django-celery-beat==2.7.0
 django-celery-results==2.5.1
 django-ratelimit==4.1.0
 djangorestframework==3.15.2
