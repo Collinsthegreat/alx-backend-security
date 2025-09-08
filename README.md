@@ -1,252 +1,283 @@
-Skip to content
-Navigation Menu
-thecollekta
-alx-backend-security
+# ALX Backend Security - IP Tracking System
 
-Type / to search
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-Owner avatar
-alx-backend-security
-Public
-thecollekta/alx-backend-security
-Go to file
-t
-Name		
-thecollekta
-thecollekta
-feat(anomaly): implement automated suspicious activity detection
-b2874c0
- · 
-5 days ago
-alx_backend_security
-feat(anomaly): implement automated suspicious activity detection
-5 days ago
-ip_tracking
-feat(anomaly): implement automated suspicious activity detection
-5 days ago
-.gitignore
-feat(anomaly): implement automated suspicious activity detection
-5 days ago
-README.md
-feat(anomaly): implement automated suspicious activity detection
-5 days ago
-manage.py
-feat: Implement IP Logging Middleware
-last week
-requirements.txt
-feat(anomaly): implement automated suspicious activity detection
-5 days ago
-Repository files navigation
-README
-IP Tracking and Security System
-A comprehensive Django application that provides IP tracking, geolocation, rate limiting, and security features.
+A comprehensive Django-based IP tracking and security system that provides logging, blacklisting, geolocation, rate limiting, and anomaly detection capabilities.
 
-Features
-IP Geolocation: Automatic country and city detection
-Request Logging: Detailed request tracking with metadata
-IP Blacklisting: Block malicious or suspicious IPs
-Rate Limiting: Protect against abuse
-Anomaly Detection: Automatic detection of suspicious activity
-Admin Interface: Easy management of logs and blocked IPs
-Caching: Optimized performance with request caching
-Installation
-Clone the repository:
+## 🚀 Features
 
-git clone https://github.com/yourusername/alx-backend-security.git
+### Task 0: Basic IP Logging Middleware ✅
+- **IP Address Tracking**: Logs every incoming request with IP, timestamp, and path
+- **Middleware Integration**: Seamlessly integrated into Django's middleware stack
+- **Database Storage**: Persistent storage of request logs with the `RequestLog` model
+
+### Task 1: IP Blacklisting ✅
+- **Dynamic IP Blocking**: Block malicious IPs with HTTP 403 responses
+- **Management Commands**: Easy-to-use command-line tools for blocking/unblocking IPs
+- **Admin Interface**: Web-based administration for managing blocked IPs
+- **Caching**: Efficient Redis-based caching for fast IP lookup
+
+### Task 2: IP Geolocation Analytics ✅
+- **Geographic Data**: Automatically fetch country, city, and region information
+- **Multiple API Support**: Fallback support for multiple geolocation services
+- **24-hour Caching**: Efficient caching to reduce API calls and improve performance
+- **Enhanced Logging**: Location-aware request logging
+
+### Task 3: Rate Limiting by IP ✅
+- **Tiered Rate Limits**: Different limits for authenticated vs anonymous users
+- **Sensitive Endpoint Protection**: Special protection for login and admin endpoints
+- **Django-ratelimit Integration**: Production-ready rate limiting with Redis backend
+- **Configurable Limits**: Easy to adjust rate limits per endpoint
+
+### Task 4: Anomaly Detection ✅
+- **Automated Detection**: Hourly Celery tasks to identify suspicious behavior
+- **Multiple Detection Methods**: 
+  - High volume requests (>100 requests/hour)
+  - Sensitive path access patterns
+  - Rapid-fire request detection
+  - Geographic anomalies
+- **Severity Classification**: Low, medium, high, and critical threat levels
+- **Auto-blocking**: Automatic blocking of critical threats
+
+## 📁 Project Structure
+
+```
+alx-backend-security/
+├── backend_security/          # Django project settings
+│   ├── __init__.py
+│   ├── settings.py           # Main configuration
+│   ├── urls.py              # URL routing
+│   ├── wsgi.py              # WSGI configuration
+│   ├── asgi.py              # ASGI configuration
+│   └── celery.py            # Celery configuration
+├── ip_tracking/              # Main IP tracking application
+│   ├── __init__.py
+│   ├── admin.py             # Django admin configuration
+│   ├── apps.py              # App configuration
+│   ├── middleware.py        # IP tracking and blocking middleware
+│   ├── models.py            # Database models
+│   ├── views.py             # API endpoints
+│   ├── urls.py              # URL patterns
+│   ├── geolocation.py       # IP geolocation service
+│   ├── tasks.py             # Celery background tasks
+│   ├── management/          # Django management commands
+│   │   └── commands/
+│   │       └── block_ip.py  # IP blocking command
+│   └── migrations/          # Database migrations
+├── manage.py                # Django management script
+├── .gitignore              # Git ignore rules
+└── README.md               # This file
+```
+
+## 🛠️ Installation & Setup
+
+### Prerequisites
+- Python 3.8+
+- Django 5.2+
+- Redis (for caching and Celery)
+- PostgreSQL/MySQL (for production) or SQLite (for development)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/codexoft-ke/alx-backend-security.git
 cd alx-backend-security
-Install dependencies:
+```
 
-pip install -r requirements.txt
-Configure your settings in settings.py:
+### 2. Install Dependencies
+```bash
+pip install django celery redis requests django-ratelimit
+```
 
-INSTALLED_APPS = [
-    # ...
-    'ip_tracking',
-    'django_celery_beat',
-    'django_celery_results',
-]
-
-# IP Tracking Settings
-SUSPICIOUS_REQUEST_THRESHOLD = 100  # requests per hour
-SENSITIVE_PATHS = [
-    '/admin/',
-    '/login/',
-    '/api/auth/',
-]
-
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-Run migrations:
-
+### 3. Database Setup
+```bash
+python manage.py makemigrations
 python manage.py migrate
-Start Redis (required for Celery):
+```
 
-# On Linux
-sudo service redis-server start
+### 4. Create Superuser
+```bash
+python manage.py createsuperuser
+```
 
-# On Windows
-# Download and install Redis from: https://github.com/microsoftarchive/redis/releases
-Start Celery worker and beat (in separate terminals):
+### 5. Start Redis Server
+```bash
+redis-server
+```
 
-# Terminal 1 - Celery worker
-celery -A alx_backend_security worker --loglevel=info -P solo
+### 6. Start Celery Worker (in separate terminal)
+```bash
+celery -A backend_security worker -l info
+```
 
-# Terminal 2 - Celery beat
-celery -A alx_backend_security beat --loglevel=info
-Anomaly Detection
-The system includes automated anomaly detection that runs hourly to identify suspicious activity:
+### 7. Start Celery Beat (in separate terminal)
+```bash
+celery -A backend_security beat -l info
+```
 
-Detection Rules
-High Volume Requests:
+### 8. Run Development Server
+```bash
+python manage.py runserver
+```
 
-Flags IPs making more than 100 requests per hour (configurable via SUSPICIOUS_REQUEST_THRESHOLD)
-Logs to SuspiciousIP model with reason 'high_volume'
-Sensitive Path Access:
+## 🔧 Configuration
 
-Monitors access to sensitive paths (default: /admin/, /login/, /api/auth/)
-Logs to SuspiciousIP model with reason 'sensitive_path'
-Monitoring Suspicious Activity
-View detected suspicious IPs in the admin interface at /admin/ip_tracking/suspiciousip/ or via the Django shell:
+### Middleware Setup
+The IP tracking middleware is already configured in `settings.py`:
+```python
+MIDDLEWARE = [
+    # ... other middleware
+    'ip_tracking.middleware.IPTrackingMiddleware',
+]
+```
 
-from ip_tracking.models import SuspiciousIP
+### Rate Limiting Configuration
+Rate limits are configured per view:
+- Anonymous users: 5 requests/minute on sensitive endpoints
+- Authenticated users: 10 requests/minute on API endpoints
+- Admin endpoints: 3 requests/minute
 
-# Get all active suspicious IPs
-suspicious_ips = SuspiciousIP.objects.filter(is_active=True)
+### Geolocation APIs
+The system uses multiple geolocation providers with automatic fallback:
+1. ipapi.co (primary)
+2. ip-api.com (fallback)
 
-# Get IPs flagged for high volume
-high_volume_ips = SuspiciousIP.objects.filter(reason='high_volume')
-Manual Trigger
-You can manually trigger the anomaly detection task:
+## 📚 Usage
 
-from ip_tracking.tasks import detect_suspicious_activity
+### Blocking IPs via Command Line
+```bash
+# Block a single IP
+python manage.py block_ip 192.168.1.100 --reason "Malicious activity"
 
-# Run synchronously
-result = detect_suspicious_activity()
+# Block a network range
+python manage.py block_ip 192.168.1.0/24 --reason "Suspicious network"
 
-# Or asynchronously
-result = detect_suspicious_activity.delay()
-Usage
-API Endpoints
-Test Geolocation
-GET /ip-tracking/test-geo/
-POST /ip-tracking/test-geo/
-Example Request:
+# Unblock an IP
+python manage.py block_ip 192.168.1.100 --unblock
 
-curl -X POST http://127.0.0.1:8000/ip-tracking/test-geo/ \
-  -H "Content-Type: application/json" \
-  -d '{"ip": "197.210.64.1"}'  # Ghana IP
-Example Response:
+# List all blocked IPs
+python manage.py block_ip --list
+```
 
-{
-    "ip_address": "197.210.64.1",
-    "country": "Ghana",
-    "city": "Accra",
-    "latitude": 5.55,
-    "longitude": -0.2167
-}
-Rate Limited Login
-POST /ip-tracking/login/
-Rate Limits:
+### API Endpoints
+- `GET /ip-tracking/test/` - Test endpoint to verify middleware
+- `POST /ip-tracking/login/` - Rate-limited login endpoint
+- `GET /ip-tracking/api/authenticated/` - Authenticated API endpoint
+- `GET /ip-tracking/admin/sensitive/` - Highly rate-limited admin endpoint
+- `GET /ip-tracking/stats/` - IP statistics for current user
 
-10 requests/minute for authenticated users
-5 requests/minute for anonymous users
-Management Commands
-Block an IP Address
-python manage.py block_ip 192.168.1.100 --reason "Suspicious activity"
-Run Anomaly Detection Manually
-python manage.py shell -c "from ip_tracking.tasks import detect_suspicious_activity; detect_suspicious_activity()"
-Admin Interface
-Access the admin panel at http://127.0.0.1:8000/admin/ to:
+### Admin Interface
+Access the Django admin at `/admin/` to:
+- View request logs with geolocation data
+- Manage blocked IPs
+- Review suspicious IP flags
+- Bulk operations on suspicious IPs
 
-View and manage request logs
-Block/unblock IP addresses
-Monitor system activity
-Testing
-Run Tests
+## 🔍 Monitoring & Analytics
+
+### Request Logs
+All requests are logged with:
+- IP address
+- Timestamp
+- Request path
+- Geographic location (country, city, region)
+- Coordinates (latitude, longitude)
+
+### Suspicious Activity Detection
+The system automatically detects:
+- **High Volume**: >100 requests/hour from single IP
+- **Sensitive Access**: Multiple attempts to access admin/login endpoints
+- **Rapid Fire**: >20 requests in 5-minute windows
+- **Geographic Anomalies**: Requests from multiple countries
+
+### Security Reports
+Daily security reports include:
+- Total requests and unique IPs
+- Currently blocked IPs
+- Suspicious activity flags
+- Top countries by request volume
+
+## 🚨 Security Considerations
+
+### Privacy Compliance
+- IP addresses can be anonymized for GDPR compliance
+- Configurable data retention periods
+- Geographic data is cached to minimize API calls
+
+### Performance Optimization
+- Redis caching for blocked IP lookups
+- Geolocation data caching (24 hours)
+- Efficient database queries with proper indexing
+
+### Rate Limiting Best Practices
+- Different limits for different user types
+- Graceful degradation with informative error messages
+- Bypass options for trusted IP ranges
+
+## 🧪 Testing
+
+Run the test suite to verify functionality:
+```bash
 python manage.py test ip_tracking
-Manual Testing
-Test Rate Limiting
+```
 
-# Test anonymous rate limit (5 requests/minute)
-for i in {1..6}; do
-    curl http://127.0.0.1:8000/ip-tracking/test-geo/
-    echo "---"
-done
-Test IP Blocking
+## 📈 Monitoring
 
-# Block an IP
-python manage.py block_ip 192.168.1.100
+### Log Files
+- Application logs: `ip_tracking.log`
+- Celery logs: Configure in your deployment
 
-# Test blocked IP
-curl -H "X-Forwarded-For: 192.168.1.100" http://127.0.0.1:8000/ip-tracking/test-geo/
-Configuration
-Rate Limiting
-Configure in settings.py:
+### Metrics to Monitor
+- Request volume by IP
+- Blocked request attempts
+- Geolocation API usage
+- Anomaly detection accuracy
 
-RATELIMIT_GROUP_HANDLERS = {
-    'login': 'ip_tracking.ratelimit_handlers.login_handler',
-    'geo_test': 'ip_tracking.ratelimit_handlers.geo_test_handler',
-}
-Caching
-Default uses local memory cache. For production, use Redis or Memcached:
+## 🚀 Production Deployment
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-    }
-}
-Security Considerations
-IP addresses are hashed before storage
-Rate limiting helps prevent brute force attacks
-Admin interface is protected by Django's authentication
-Sensitive endpoints require authentication
-Automated anomaly detection runs hourly to identify suspicious patterns
-License
-This project is for educational purposes under the ALX ProDEV SE Program.
+### Environment Variables
+```bash
+export DJANGO_SETTINGS_MODULE=backend_security.settings
+export CELERY_BROKER_URL=redis://localhost:6379/0
+export DATABASE_URL=postgresql://user:pass@localhost/dbname
+```
 
-About
-IP Tracking: Security and Analytics
+### Required Services
+1. **Web Server**: Gunicorn + Nginx
+2. **Database**: PostgreSQL/MySQL
+3. **Cache**: Redis
+4. **Queue**: Celery with Redis broker
+5. **Scheduler**: Celery Beat
 
-Resources
- Readme
- Activity
-Stars
- 0 stars
-Watchers
- 0 watching
-Forks
- 0 forks
-Report repository
-Releases
-No releases published
-Packages
-No packages published
-Languages
-Python
-100.0%
-Footer
-© 2025 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
-Security
-Status
-GitHub Community
-Docs
-Contact
-Manage cookies
-Do not share my personal information
-alx-backend-security/.gitignore at main · thecollekta/alx-backend-security
+### Scaling Considerations
+- Use multiple Celery workers for high-volume sites
+- Consider rate limiting at the load balancer level
+- Implement log rotation for large-scale deployments
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Review the documentation
+- Check the logs for error details
+
+## 🔄 Changelog
+
+### v1.0.0
+- ✅ Basic IP logging middleware
+- ✅ IP blacklisting system
+- ✅ Geolocation analytics
+- ✅ Rate limiting implementation
+- ✅ Anomaly detection with Celery
+- ✅ Admin interface
+- ✅ Management commands
+- ✅ Comprehensive testing
