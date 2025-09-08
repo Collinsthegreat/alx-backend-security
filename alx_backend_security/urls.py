@@ -16,18 +16,36 @@ Including another URLconf
 """
 # alx_backend_security/urls.py
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from ip_tracking import views
 
-#urlpatterns = [
-#    path("admin/", admin.site.urls),
-#    path("anon-login/", views.anonymous_login, name="anon_login"),
-#    path("user-login/", views.user_login, name="user_login"),
-#]
+# Swagger imports
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# Configure Swagger schema view
+schema_view = get_schema_view(
+    openapi.Info(
+        title="ALX Backend Security API",
+        default_version="v1",
+        description="Swagger API documentation for the ALX project",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="support@example.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('anon-login/', views.anon_login, name='anon_login'),
     path('user-login/', views.user_login, name='user_login'),
-    path('', views.home, name='home'),  # 👈 New homepage
+    path('', views.home, name='home'),
+
+    # Swagger UI
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
